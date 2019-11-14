@@ -3478,11 +3478,7 @@ handle_handshake(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
     }
   }
 
-  if (dtls_uint16_to_int(hs_header->message_seq) < peer->handshake_params->hs_state.mseq_r) {
-    dtls_warn("The message sequence number is too small, expected %i, got: %i\n",
-	      peer->handshake_params->hs_state.mseq_r, dtls_uint16_to_int(hs_header->message_seq));
-    return 0;
-  } else if (dtls_uint16_to_int(hs_header->message_seq) > peer->handshake_params->hs_state.mseq_r) {
+  if (dtls_uint16_to_int(hs_header->message_seq) > peer->handshake_params->hs_state.mseq_r) {
     /* A packet in between is missing, buffer this packet. */
     netq_t *n;
 
@@ -3518,7 +3514,7 @@ handle_handshake(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
     }
     dtls_info("Added packet for reordering\n");
     return 0;
-  } else if (dtls_uint16_to_int(hs_header->message_seq) == peer->handshake_params->hs_state.mseq_r) {
+  } else if (dtls_uint16_to_int(hs_header->message_seq) <= peer->handshake_params->hs_state.mseq_r) {
     /* Found the expected packet, use this and all the buffered packet */
     int next = 1;
 
